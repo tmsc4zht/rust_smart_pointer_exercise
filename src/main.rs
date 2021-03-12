@@ -27,6 +27,17 @@ impl<T> Deref for MyBox<T> {
     }
 }
 
+// Dropトレイトの確認
+struct CustomSmartPointer {
+    data: String,
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+    }
+}
+
 fn hello(name: &str) {
     println!("Hello, {}", name);
 }
@@ -59,4 +70,18 @@ fn main() {
     // Consの実行テスト
     let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
     println!("{:?}", list);
+
+    // Dropの実行テスト
+    let _c = CustomSmartPointer {
+        data: String::from("first"),
+    };
+    let _d = CustomSmartPointer {
+        data: String::from("second"),
+    };
+    drop(_c);
+    {
+        let _e = CustomSmartPointer {
+            data: String::from("third"),
+        };
+    }
 }
