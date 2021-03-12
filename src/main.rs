@@ -1,3 +1,6 @@
 fn main() {
-    println!("Hello, world!");
+    let b = Box::new(5);
+    // 値5はヒープ領域に確保されている
+    // bかスコープから抜けるとき、メモリの開放が起きる。
+    println!("b = {}", b)
 }
