@@ -27,6 +27,10 @@ impl<T> Deref for MyBox<T> {
     }
 }
 
+fn hello(name: &str) {
+    println!("Hello, {}", name);
+}
+
 fn main() {
     let b = Box::new(5);
     // 値5はヒープ領域に確保されている
@@ -42,6 +46,15 @@ fn main() {
     // スマートポインタの自前実装について
     let y = MyBox::new(x);
     assert_eq!(*y, 5);
+
+    // 参照外し型強制について
+    let m = MyBox::new(String::from("Rust"));
+
+    // helloの引数の型は`&str`だが、参照外し型強制がはたらく。
+    // MyBoxはderefを実装しているため、&MyBoxのderefが呼ばれ&Stringが返る
+    // Stringはderefを実装しているため、&Stringのderefが呼ばれ&strが返る
+    // 結局関数の引数の型に一致するようになる。
+    hello(&m);
 
     // Consの実行テスト
     let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
