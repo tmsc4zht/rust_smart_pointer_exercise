@@ -73,9 +73,13 @@ fn main() {
     println!("{:?}", list);
 
     // Consの実行テスト（データ共有）
+    // 右辺の所有権はaにある。
     let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
     // a生成後のカウント = {}
     println!("count after creating a = {}", Rc::strong_count(&a));
+
+    // aの指す値の所有権はaにあるので、直接aをConsの後ろに入れると
+    // 所有権がbに移り、aを使って参照できなくなる
     let _b = Cons(3, Rc::clone(&a));
     // b生成後のカウント = {}
     println!("count after creating b = {}", Rc::strong_count(&a));
