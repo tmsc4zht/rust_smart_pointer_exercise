@@ -1,10 +1,11 @@
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
 // Cons, Nilはenum Listの列挙子としてここで「定義」している
 #[derive(Debug)]
 enum List {
-    Cons(i32, Rc<List>),
+    Cons(Rc<RefCell<i32>>, Rc<List>),
     Nil,
 }
 
@@ -69,22 +70,31 @@ fn main() {
     hello(&m);
 
     // Consの実行テスト
-    let list = Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Nil))))));
+    let list = Cons(
+        Rc::new(RefCell::new(1)),
+        Rc::new(Cons(
+            Rc::new(RefCell::new(2)),
+            Rc::new(Cons(Rc::new(RefCell::new(3)), Rc::new(Nil))),
+        )),
+    );
     println!("{:?}", list);
 
     // Consの実行テスト（データ共有）
     // 右辺の所有権はaにある。
-    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    let a = Rc::new(Cons(
+        Rc::new(RefCell::new(5)),
+        Rc::new(Cons(Rc::new(RefCell::new(10)), Rc::new(Nil))),
+    ));
     // a生成後のカウント = {}
     println!("count after creating a = {}", Rc::strong_count(&a));
 
     // aの指す値の所有権はaにあるので、直接aをConsの後ろに入れると
     // 所有権がbに移り、aを使って参照できなくなる
-    let _b = Cons(3, Rc::clone(&a));
+    let _b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a));
     // b生成後のカウント = {}
     println!("count after creating b = {}", Rc::strong_count(&a));
     {
-        let _c = Cons(4, Rc::clone(&a));
+        let _c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a));
         // c生成後のカウント = {}
         println!("count after creating c = {}", Rc::strong_count(&a));
     }
@@ -104,4 +114,18 @@ fn main() {
             data: String::from("third"),
         };
     }
+
+    // 可変化できるList
+    let value = Rc::new(RefCell::new(5));
+
+    let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+
+    let b = Cons(Rc::new(RefCell::new(6)), Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(10)), Rc::clone(&a));
+
+    *value.borrow_mut() += 10;
+
+    println!("a after = {:?}", a);
+    println!("b after = {:?}", b);
+    println!("c after = {:?}", c);
 }
