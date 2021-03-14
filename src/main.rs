@@ -2,6 +2,13 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
+// 木構造データ
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
 // Cons, Nilはenum Listの列挙子としてここで「定義」している
 #[derive(Debug)]
 enum List {
@@ -128,4 +135,17 @@ fn main() {
     println!("a after = {:?}", a);
     println!("b after = {:?}", b);
     println!("c after = {:?}", c);
+
+    // 木構造データのテスト
+    let leaf = Rc::new(Node {
+        value: 3,
+        children: RefCell::new(vec![]),
+    });
+
+    let branch = Rc::new(Node {
+        value: 5,
+        children: RefCell::new(vec![Rc::clone(&leaf)]),
+    });
+
+    println!("{:?}", branch);
 }
