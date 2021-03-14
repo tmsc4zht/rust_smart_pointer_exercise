@@ -1,12 +1,13 @@
 use std::cell::RefCell;
 use std::ops::Deref;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 // 木構造データ
 #[derive(Debug)]
 struct Node {
     value: i32,
     children: RefCell<Vec<Rc<Node>>>,
+    parent: RefCell<Weak<Node>>,
 }
 
 // Cons, Nilはenum Listの列挙子としてここで「定義」している
@@ -139,13 +140,20 @@ fn main() {
     // 木構造データのテスト
     let leaf = Rc::new(Node {
         value: 3,
+        parent: RefCell::new(Weak::new()),
         children: RefCell::new(vec![]),
     });
 
+    // leafの親 = {:?}
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+
     let branch = Rc::new(Node {
         value: 5,
+        parent: RefCell::new(Weak::new()),
         children: RefCell::new(vec![Rc::clone(&leaf)]),
     });
 
-    println!("{:?}", branch);
+    *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
 }
